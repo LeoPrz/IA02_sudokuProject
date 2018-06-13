@@ -1,5 +1,5 @@
 # IA02_sudokuProject
-Sudoku with Prolog
+::Sudoku with Prolog without the GNU-PROLOG contraints::
 
 Le but de ce projet est d’élaborer une application de Sudoku en utilisant PROLOG. Cette application aura plusieurs fonctionnalités :
 - Génération automatique de grilles,
