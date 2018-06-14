@@ -158,20 +158,32 @@ get_coord_x(X,Y,S):-get_valeur(X,Y,S,x).
 solved(S):-get_coord_x(X,Y,S),!,fail.
 solved(S):-valide(S).
 
-/*
-solve(S,S):-solved(S),!.
-solve(S,Res):-get_coord_x(X,Y,S),get_possibles(X,Y,S,P),element(N,P,V),set_valeur(X,Y,S,V,NS),valide(NS),imprime(NS),nl,!,solve(NS,Res).
-*/
+genere_sudoku(S,NS):- get_coord_x(X,Y,S),!,get_possibles(X,Y,S,P),element(N,P,V),set_valeur(X,Y,S,V,NS).
 
+solve(S,S):- solved(S).
+solve(S,Solution):-genere_sudoku(S,NS),valide(NS),solve(NS,Solution).
+
+/*
+solve(S,S):- \+valide(S),!.
+solve(S,S):-solved(S),!.
+solve(S,Res):-get_coord_x(X,Y,S),!,get_possibles(X,Y,S,P),element(N,P,V),set_valeur(X,Y,S,V,NS),imprime(NS),nl,!,solve(NS,Res).
+*/
+%change_directory('C:/Users/mohamed/Desktop/IA02 Project').
+%consult('projet.pl').
+%l(S),solve_and_test(S,NS).
+
+/*
+solve_and_test(S,R):-solve(S,R),solved(R).
 genere_possibles(X,Y,S,V):- get_possibles(X,Y,S,P),element(N,P,V).
+*/
 
 %genere_sudoku(S,S):- \+valide(S),!.
 %genere_sudoku(S,[]):- get_coord_x(X,Y,S),genere_possibles(X,Y,S,V),set_valeur(X,Y,S,V,NS),valide(NS),imprime(NS),nl,genere_sudoku(NS,Res),!.
 
-genere_sudoku(S,NS):- get_coord_x(X,Y,S),genere_possibles(X,Y,S,V),set_valeur(X,Y,S,V,NS),imprime(NS).
+%genere_sudoku(S,NS):- get_coord_x(X,Y,S),genere_possibles(X,Y,S,V),set_valeur(X,Y,S,V,NS),imprime(NS).
 
 
-solve(S,Res):- genere_sudoku(S,Res),print("----------1----------"),solved(Res).
+%solve(S,Res):- genere_sudoku(S,Res),print("----------1----------"),solved(Res).
 
 
 % exempleValide1(S),get_coord_x(X,Y,S).%
@@ -237,7 +249,7 @@ l2([
 
 test_poss([
 [1,4,3,7,8,9,2,5,6],
-[6,5,2,x,x,x,1,8,x],
+[6,5,2,4,3,x,1,8,x],
 [x,x,x,x,x,1,x,9,4],
 [9,x,x,x,x,4,x,7,x],
 [x,x,x,6,x,8,x,x,x],
@@ -246,6 +258,17 @@ test_poss([
 [x,x,x,x,x,x,x,x,5],
 [x,3,4,x,9,x,7,1,x]
 ]).
-  
+ 
+
+solved([[1,4,3,9,8,6,2,5,7],
+[6,7,9,4,2,5,3,8,1],
+[2,8,5,7,3,1,6,9,4],
+[9,6,2,3,5,4,1,7,8],
+[3,5,7,6,1,8,9,4,2],
+[4,1,8,2,7,9,5,6,3],
+[8,2,1,5,6,7,4,3,9],
+[7,9,6,1,4,3,8,2,5],
+[5,3,4,8,9,2,7,1,6]]).
+
 %grille(0,L).
 %grille(N,L):- N>0,concat(L,liste(X),L),grille(N-1,L).
