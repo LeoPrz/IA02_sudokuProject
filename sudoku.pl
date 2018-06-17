@@ -348,7 +348,7 @@ rGridEx([
 [x,x,x,x,y,x,x,x,y]
 ]).
 
-solved([[1,4,3,9,8,6,2,5,7],
+solvedEx([[1,4,3,9,8,6,2,5,7],
 [6,7,9,4,2,5,3,8,1],
 [2,8,5,7,3,1,6,9,4],
 [9,6,2,3,5,4,1,7,8],
@@ -356,7 +356,7 @@ solved([[1,4,3,9,8,6,2,5,7],
 [4,1,8,2,7,9,5,6,3],
 [8,2,1,5,6,7,4,3,9],
 [7,9,6,1,4,3,8,2,5],
-[5,3,4,8,9,2,7,1,6]]).
+[5,3,4,8,9,2,7,1,x]]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -385,6 +385,14 @@ interpreterMenu(3):- sudoVide(S),genere_random_grid_y(7,S,NS),gen_r_repeat(NS,R)
 					 retractall(jouerSudo(_)),asserta(jouerSudo(R)),
 					 retractall(baseJouerSudo(_)),asserta(baseJouerSudo(NS)),
 					 repeat,jouer_sudo_user,!.
+
+%%% POUR TESTER VALIDER
+/*
+interpreterMenu(3):- sudoVide(NS),solvedEx(R),
+					 retractall(jouerSudo(_)),asserta(jouerSudo(R)),
+					 retractall(baseJouerSudo(_)),asserta(baseJouerSudo(NS)),
+					 repeat,jouer_sudo_user,!.
+*/
 interpreterMenu(4).
 
 % sudoVide(S),genere_random_grid_y(S,NS),,retractall(sudoRandom(_))
@@ -433,10 +441,14 @@ interpreterJeu(3):- jouerSudo(S),solved(S),write('** FELICITAION !**'),!.
 
 interpreterJeu(3):- write('** Le sudoku n\'est pas valide **'),jouer_sudo_user,!.
 
+interpreterJeu(4):- jouerSudo(S),baseJouerSudo(B),recup_base_sudo(S,B,SB),solve(SB),nl,write('** --Solution-- **'),imprimeCalque(SB,B),!.
+
+
 interpreterJeu(5).
 				
 interpreterJeu(X):- X>5,write('** Erreur choix **'),jouer_sudo_user.
 
+recup_base_sudo(_,B,_):- \+ get_coord_y(X,Y,B),!.
 recup_base_sudo(S,B,SB):- get_coord_y(X,Y,B),!,get_valeur(X,Y,S,V),set_valeur(X,Y,B,V,SB),set_valeur(X,Y,B,x,NB),recup_base_sudo(S,NB,SB).
 %%%%%%%%%%%% resolution %%%%%%%%%%%%
 
