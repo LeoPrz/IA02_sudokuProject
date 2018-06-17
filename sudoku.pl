@@ -13,6 +13,18 @@ liste([
           [X81, X82, X83, X84, X85, X86, X87, X88, X89],
           [X91, X92, X93, X94, X95, X96, X97, X98, X99]
         ]).
+		
+sudoVide([
+          [x,x,x,x,x,x,x,x,x],
+          [x,x,x,x,x,x,x,x,x],
+		  [x,x,x,x,x,x,x,x,x],
+		  [x,x,x,x,x,x,x,x,x],
+		  [x,x,x,x,x,x,x,x,x],
+		  [x,x,x,x,x,x,x,x,x],
+		  [x,x,x,x,x,x,x,x,x],
+		  [x,x,x,x,x,x,x,x,x],
+		  [x,x,x,x,x,x,x,x,x]
+        ]).
 /* generate-and-test paradigm */
 
 %%%%%%%%%%% Base List predicates %%%%%%%%%%%%%%
@@ -46,7 +58,7 @@ retirer_element_x(_,[],[]).
 retirer_element_x(X,[X|Q],Q):-!.
 retirer_element_x(X,[T|Q],[T|Reste]):-retirer_element_x(X,Q,Reste).
 
-%% retirer_liste(E,L,NL) qui unifie NL avec la liste L auquel on a retiré tous les éléments de la liste E (s’ils existent)%%
+%% retirer_liste(E,L,NL) qui unifie NL avec la liste L auquel on a retiré tous les éléments de la liste E (sils existent) %%
 
 retirer_liste([],L,L):-!.
 retirer_liste([T|QE],L,NL):-retirer_element_x(T,L,Res),retirer_liste(QE,Res,NL).
@@ -61,23 +73,48 @@ set_element_n(N,[T|Q],X,[T|Reste]):- P is N-1,set_element_n(P,Q,X,Reste).
 varcheck([]).
 varcheck([L|T]):- nonvar(L),varcheck(T).
 
-
-imprime([]).
-imprime([T|Q]) :- imprimeLigne(T),nl,imprime(Q).
-
-imprimeLigne([]).
-imprimeLigne([T|Q]) :- nonvar(T),write(T),tab(1),imprimeLigne(Q);
-						write('_'),tab(1),imprimeLigne(Q).
-						
-imprimeIndice([]).
-imprimeIndice([T|Q]) :- imprimeLigneIndice(T),nl,imprimeIndice(Q).
-
-imprimeLigneIndice([]).
-imprimeLigneIndice([T|Q]) :- write(T),tab(1),imprimeLigneIndice(Q).
-
 aplatir([],[]).
 aplatir([T|Q],R):-aplatir(T,R1),aplatir(Q,R2),concat(R1,R2,R),!.
 aplatir(E,[E]).
+
+
+%%%% Affichage %%%%
+
+imprime(S) :- nl,imprime3Lignes(S),!,write('-------------------------').
+
+imprime3Lignes([]).
+imprime3Lignes([L1,L2,L3|Q]):- write('-------------------------'),nl,imprimeLigne(L1),nl,imprimeLigne(L2),nl,imprimeLigne(L3),nl,imprime3Lignes(Q).
+
+imprimeLigne([]):- write('|').
+imprimeLigne([V1,V2,V3|Q]) :- write('|'),tab(1),imprimeValeur(V1),tab(1),imprimeValeur(V2),tab(1),imprimeValeur(V3),tab(1),imprimeLigne(Q).
+            
+imprimeValeur(V):- V\=x, write(V);write('_').
+
+%% AFFICHAGE JEU %%
+
+imprimeCalque(S,B):- nl,imprime3LignesCalque(S,B),!,write('-----------------------------------').
+
+imprime3LignesCalque([],_).
+imprime3LignesCalque([L1,L2,L3|Q],[L1B,L2B,L3B|QB]):- write('-----------------------------------'),nl,imprimeLigneCalque(L1,L1B),nl,imprimeLigneCalque(L2,L2B),nl,imprimeLigneCalque(L3,L3B),nl,imprime3LignesCalque(Q,QB).
+
+imprimeLigneCalque([],_):- write('|').
+imprimeLigneCalque([V1,V2,V3|Q],[V1B,V2B,V3B|QB]) :- write('|'),tab(1),imprimeValeurCalque(V1,V1B),imprimeValeurCalque(V2,V2B),imprimeValeurCalque(V3,V3B),imprimeLigneCalque(Q,QB).
+  
+imprimeValeurCalque(V,VB):- V\=x, VB\=y,tab(1), write(V),tab(1),!.
+imprimeValeurCalque(V,VB):- V\=x, VB==y,write(V),write('~'),tab(1),!.
+imprimeValeurCalque(V,VB):- tab(1),write('_'),tab(1).
+
+%% Affichage indice %%
+
+imprimeIndice([]).
+imprimeIndice([T|Q]) :-imprimeLigneIndice(T),nl,imprimeIndice(Q).
+
+imprimeLigneIndice([]).
+imprimeLigneIndice([T|Q]) :-write(T),tab(1),imprimeLigneIndice(Q).
+
+%%%% -------- %%%%
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /*regionSudoku([],[]).
@@ -152,7 +189,9 @@ valide(S).
 
 get_coord_x(X,Y,S):-get_valeur(X,Y,S,x).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get_coord_y(X,Y,S):-get_valeur(X,Y,S,y).
+
+%%%%%%%%%%%%%%%% Generate and test %%%%%%%%%%%%%%%%%%%%%%
 
 
 solved(S):-get_coord_x(X,Y,S),!,fail.
@@ -162,6 +201,32 @@ genere_sudoku(S,NS):- get_coord_x(X,Y,S),!,get_possibles(X,Y,S,P),element(N,P,V)
 
 solve(S,S):- solved(S).
 solve(S,Solution):-genere_sudoku(S,NS),valide(NS),solve(NS,Solution).
+
+%%%%%%%%%%%%%%%% Random sudoku %%%%%%%%%%%%%%%%%%%%%%
+
+generated(S):- get_coord_y(X,Y,S),!,fail.
+generated(S):- valide(S).
+
+genere_random_value(X,Y,S,V):- get_possibles(X,Y,S,P),longueur(P,Long),BornSup is Long+1,random(1,BornSup,N),element(N,P,V).
+
+genere_random_sudoku(S,S):- generated(S),!.
+genere_random_sudoku(S,Solution):- get_coord_y(X,Y,S),!,genere_random_value(X,Y,S,V),set_valeur(X,Y,S,V,NS),genere_random_sudoku(NS,Solution).
+
+gen_r_repeat(S,NS):- repeat,genere_random_sudoku(S,NS),solve(NS,Solved),!.
+
+%% genere_random_value(S,NS),valide(NS),genere_random_sudoku(NS,Solution).
+
+
+genere_random_coord(X,Y):- P is 10,random(1,P,X),random(1,P,Y).
+
+genere_random_grid_y(0,S,S):- genere_random_coord(X,Y),set_valeur(X,Y,S,y,NS),!.
+genere_random_grid_y(N,S,RS):- genere_random_coord(X,Y),set_valeur(X,Y,S,y,NS),P is N-1,genere_random_grid_y(P,NS,RS).
+
+
+%change_directory('C:/Users/MegaB/Documents/GitHub/IA02_sudokuProject').
+%consult('sudoku.pl').
+% vide(S),genere_random_grid_y(20,S,NS),gen_r_repeat(NS,R),imprime(NS),imprime(R).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*
 solve(S,S):- \+valide(S),!.
@@ -259,6 +324,29 @@ test_poss([
 [x,3,4,x,9,x,7,1,x]
 ]).
  
+vide([
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x]
+]).
+
+rGridEx([
+[x,x,x,y,y,y,x,x,y],
+[x,x,x,y,y,y,x,x,y],
+[x,x,x,y,y,y,x,x,y],
+[x,x,x,x,x,x,x,x,y],
+[x,x,x,x,x,x,x,x,y],
+[x,x,x,x,x,x,x,x,y],
+[x,x,x,x,x,x,y,x,y],
+[x,x,x,x,x,x,x,x,y],
+[x,x,x,x,y,x,x,x,y]
+]).
 
 solved([[1,4,3,9,8,6,2,5,7],
 [6,7,9,4,2,5,3,8,1],
@@ -269,6 +357,172 @@ solved([[1,4,3,9,8,6,2,5,7],
 [8,2,1,5,6,7,4,3,9],
 [7,9,6,1,4,3,8,2,5],
 [5,3,4,8,9,2,7,1,6]]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% USER INTERFACE %%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+start :- nl,nl,
+		write('***************************************************'),nl,
+		write('*** Vous avez lancé le programme ProjectSudoku ***'),nl,
+		write('***************************************************'),
+		queFaire,!.
+
+queFaire :- nl,write('Que voulez vous faire ?'),nl,
+			tab(2),write('1. Resoudre un sudoku'),nl,
+			tab(2),write('2. Generer un sudoku'),nl,
+			tab(2),write('3. Jouer a un sudoku'),nl,
+			tab(2),write('4. Fin de programme'),nl,
+			write(' ---->'),tab(1),read(Option),
+			interpreterMenu(Option).
+
+%% On rajoute sudoAResoudre dans la bdd des faits, il sera modifier jusqu'a resolution
+interpreterMenu(1):- sudoVide(S),retractall(sudoAResoudre(_)),asserta(sudoAResoudre(S)),repeat,resoudre_sudo_user,!.
+interpreterMenu(2):- sudoVide(S),retractall(randomSudo(_)),asserta(randomSudo(S)),repeat,generer_sudo_user,!.
+interpreterMenu(3):- sudoVide(S),genere_random_grid_y(7,S,NS),gen_r_repeat(NS,R),
+					 retractall(jouerSudo(_)),asserta(jouerSudo(R)),
+					 retractall(baseJouerSudo(_)),asserta(baseJouerSudo(NS)),
+					 repeat,jouer_sudo_user,!.
+interpreterMenu(4).
+
+% sudoVide(S),genere_random_grid_y(S,NS),,retractall(sudoRandom(_))
+%change_directory('C:/Users/MegaB/Documents/GitHub/IA02_sudokuProject').
+%consult('sudoku.pl').
+
+%%%%%%%%%%%%    Jouer   %%%%%%%%%%%%
+
+jouer_sudo_user:- 
+			nl,write('Voici la grille actuelle :'),nl,
+			jouerSudo(S),baseJouerSudo(B),imprimeCalque(S,B),nl,
+			write('Que voulez vous faire ?'),nl,
+			tab(2),write('1. Ajouter/Modifier une valeur au sudoku'),nl,
+			tab(2),write('2. Retirer une valeur au sudoku'),nl,
+			tab(2),write('3. Faire valider sudoku'),nl,
+			tab(2),write('4. Resoudre Sudoku'),nl,
+			tab(2),write('5. Fin de programme'),nl,
+			write(' ---->'),tab(1),read(Option),
+			interpreterJeu(Option).
+
+check_not_base(X,Y,B) :- \+get_coord_y(X,Y,B).
+			
+interpreterJeu(1):- read_coord_user(X,Y),
+					baseJouerSudo(B), check_not_base(X,Y,B),
+					jouerSudo(S),read_valeur(V),
+					set_valeur(X,Y,S,V,NS),
+					valide(NS),
+					retract(jouerSudo(S)),
+					asserta(jouerSudo(NS)),
+				    write('** Ajout réussi **'),nl,jouer_sudo_user,!.
+					
+interpreterJeu(1):- write('**** AJOUT INVALIDE ****'),jouer_sudo_user,!.
+
+interpreterJeu(2):- read_coord_user(X,Y),
+					baseJouerSudo(B), check_not_base(X,Y,B),
+					jouerSudo(S),
+					set_valeur(X,Y,S,x,NS),
+					valide(NS),
+					retract(jouerSudo(S)),
+					asserta(jouerSudo(NS)),
+					write('** Suppression réussie **'),jouer_sudo_user,!.
+
+interpreterJeu(2):- write('**** SUPPRESSION INVALIDE ****'),jouer_sudo_user,!.
+
+interpreterJeu(3):- jouerSudo(S),solved(S),write('** FELICITAION !**'),!.
+
+interpreterJeu(3):- write('** Le sudoku n\'est pas valide **'),jouer_sudo_user,!.
+
+interpreterJeu(5).
+				
+interpreterJeu(X):- X>5,write('** Erreur choix **'),jouer_sudo_user.
+
+recup_base_sudo(S,B,SB):- get_coord_y(X,Y,B),!,get_valeur(X,Y,S,V),set_valeur(X,Y,B,V,SB),set_valeur(X,Y,B,x,NB),recup_base_sudo(S,NB,SB).
+%%%%%%%%%%%% resolution %%%%%%%%%%%%
+
+resoudre_sudo_user:- 
+			nl,write('Voici la grille actuelle :'),nl,
+			sudoAResoudre(S),imprime(S),nl,
+			write('Que voulez vous faire ?'),nl,
+			tab(2),write('1. Ajouter/Modifier une valeur au sudoku'),nl,
+			tab(2),write('2. Retirer une valeur au sudoku'),nl,
+			tab(2),write('3. Resoudre sudoku'),nl,
+			tab(2),write('4. Fin de programme'),nl,
+			write(' ---->'),tab(1),read(Option),
+			interpreterResolution(Option).
+
+interpreterResolution(1):- read_coord_user(X,Y),
+						   read_valeur(V),
+						   sudoAResoudre(S),
+						   set_valeur(X,Y,S,V,NS),
+						   valide(NS),
+						   retract(sudoAResoudre(S)),
+						   asserta(sudoAResoudre(NS)),
+						   write('** Ajout réussi **'),nl,resoudre_sudo_user,!.
+						   
+interpreterResolution(1):-  write('**** erreur : Valeur dans ligne/region/colone  ****'),resoudre_sudo_user.
+						   
+interpreterResolution(2):- read_coord_user(X,Y),
+						   sudoAResoudre(S),
+						   set_valeur(X,Y,S,x,NS),
+						   valide(NS),
+						   retract(sudoAResoudre(S)),
+						   asserta(sudoAResoudre(NS)),
+						   write('** Suppression réussie **'),resoudre_sudo_user.
+						   
+interpreterResolution(3):- sudoAResoudre(S),solve(S,NS),
+						   write('Voici la solution'),nl,
+						   imprime(NS),!.
+
+interpreterResolution(3):- nl,write('** Pas de solutions **').
+
+interpreterResolution(4).
+
+interpreterResolution(X):- X>4,write('** Erreur choix **'),resoudre_sudo_user.
+
+%%%%%%%%%%%% resolution %%%%%%%%%%%%
+
+generer_sudo_user:- 
+			nl,write('Voici la grille actuelle :'),nl,
+			randomSudo(S),imprime(S),nl,
+			write('Que voulez vous faire ?'),nl,
+			tab(2),write('1. Générer des valeur aléatoires'),nl,
+			tab(2),write('2. Resoudre la grille'),nl,
+			tab(2),write('4. Fin de programme'),nl,
+			write(' ---->'),tab(1),read(Option),
+			interpreterGeneration(Option).
+			
+interpreterGeneration(1):- read_nb_cases(NB),
+						   randomSudo(S),
+						   genere_random_grid_y(NB,S,NS),
+						   gen_r_repeat(NS,R),
+						   retract(randomSudo(S)),
+						   asserta(randomSudo(R)),
+						   nl,write('Generation réussie'),generer_sudo_user.
+						   
+interpreterGeneration(2):- randomSudo(S),
+						   solve(S,NS),
+						   nl,write('** Voici la solution **'),nl,
+						   imprime(NS).
+						   
+
+interpreterGeneration(4).
+
+
+
+
+read_coord_user(X,Y):- nl,write('Ligne de la case : '),nl,write(' ---->'), read(X),read_valide(X),nl,
+					   write('Colonne de la case : '),nl,write(' ---->'), read(Y),read_valide(Y),nl,!.
+
+read_coord_user(_,_):- nl,write('***** COORDONNEES INVALIDES *****'),nl,fail.
+
+read_valeur(V):- write('valeur de la case : '),nl,write(' ---->'), read(V),read_valide(V),nl,!.
+
+read_valeur(V):- nl,write('***** VALEUR INVALIDE *****'),nl,fail.
+
+read_valide(X):- X>0,X<10.
+
+read_nb_cases(NB) :- write('nombre de cases au plus à changer : '),nl,write(' ---->'), read(NB),nl,!.
 
 %grille(0,L).
 %grille(N,L):- N>0,concat(L,liste(X),L),grille(N-1,L).
