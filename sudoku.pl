@@ -336,6 +336,18 @@ vide([
 [x,x,x,x,x,x,x,x,x]
 ]).
 
+calque([
+[x,x,x,x,x,y,x,x,x],
+[x,x,x,x,y,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x],
+[x,x,x,x,x,x,x,x,x]
+]).
+
 rGridEx([
 [x,x,x,y,y,y,x,x,y],
 [x,x,x,y,y,y,x,x,y],
@@ -441,15 +453,20 @@ interpreterJeu(3):- jouerSudo(S),solved(S),write('** FELICITAION !**'),!.
 
 interpreterJeu(3):- write('** Le sudoku n\'est pas valide **'),jouer_sudo_user,!.
 
-interpreterJeu(4):- jouerSudo(S),baseJouerSudo(B),recup_base_sudo(S,B,SB),solve(SB),nl,write('** --Solution-- **'),imprimeCalque(SB,B),!.
+interpreterJeu(4):- jouerSudo(S),baseJouerSudo(B),recup_sudo_calque(S,B,SB),solve(SB,Solved),nl,write('** --Solution-- **'),imprimeCalque(Solved,B),!.
 
 
 interpreterJeu(5).
 				
 interpreterJeu(X):- X>5,write('** Erreur choix **'),jouer_sudo_user.
 
-recup_base_sudo(_,B,_):- \+ get_coord_y(X,Y,B),!.
-recup_base_sudo(S,B,SB):- get_coord_y(X,Y,B),!,get_valeur(X,Y,S,V),set_valeur(X,Y,B,V,SB),set_valeur(X,Y,B,x,NB),recup_base_sudo(S,NB,SB).
+recup_sudo_calque(_,B,Res,Res):- valide(B),!.
+recup_sudo_calque(S,B,ORes,Res):- get_coord_y(X,Y,B),!,get_valeur(X,Y,S,V),set_valeur(X,Y,ORes,V,Tmp),set_valeur(X,Y,B,x,NB),recup_sudo_calque(S,NB,Tmp,Res).
+
+recup_sudo_calque(S,B,SB):-vide(X),recup_sudo_calque(S,B,X,SB).
+
+% calque(B),exempleValide1(S),recup_sudo_calque(S,B,SB).
+
 %%%%%%%%%%%% resolution %%%%%%%%%%%%
 
 resoudre_sudo_user:- 
@@ -516,8 +533,6 @@ interpreterGeneration(2):- randomSudo(S),
 						   solve(S,NS),
 						   nl,write('** Voici la solution **'),nl,
 						   imprime(NS).
-						   
-
 interpreterGeneration(4).
 
 
