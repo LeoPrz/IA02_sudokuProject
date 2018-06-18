@@ -32,26 +32,26 @@ tri([],[]).
 tri([T|Q],Res) :- nonvar(T),partition(T,Q,Linf,Lsup),tri(Linf,LinfTrie),tri(Lsup,LsupTrie),concat(LinfTrie,[T|LsupTrie],Res),!.
 tri([T|Q],Res) :- partition(0,Q,Linf,Lsup),tri(Linf,LinfTrie),tri(Lsup,LsupTrie),concat(LinfTrie,[T|LsupTrie],Res),!.
 
-%% Nième élément de la liste L avec la variable X. %%
+%% Nieme Ã©lÃ©ment de la liste L avec la variable X. %%
 element(1,[X|_],X).
 element(Res,[_|Q],X):-element(N,Q,X), Res is N+1.
 
-%%  retirer_element_n(N,L,NL)  unifie NL avec la liste obtenue en enlevant Ne élément de la liste L.%%
+%%  retirer_element_n(N,L,NL)  unifie NL avec la liste obtenue en enlevant Ne ??ent de la liste L.%%
 retirer_element_n(1,[T|Q],Q):-!.
 retirer_element_n(N,[T|Q],[T|Reste]):-P is N-1, retirer_element_n(P,Q,Reste).
 
-%%  retirer_element_x(X,L,NL) qui unifie avec la variable NL la liste obtenue en retirant l’élément unifié avec X de la liste L. Si l’élément X n’appartient pas à L,alors le prédicat n’échouera pas et NL=L.%% 
+%%  retirer_element_x(X,L,NL) qui unifie avec la variable NL la liste obtenue en retirant l???ent unifi?avec X de la liste L. Si l???ent X n?appartient pas ?L,alors le pr?icat n??houera pas et NL=L.%%
 
 retirer_element_x(_,[],[]).
 retirer_element_x(X,[X|Q],Q):-!.
 retirer_element_x(X,[T|Q],[T|Reste]):-retirer_element_x(X,Q,Reste).
 
-%% retirer_liste(E,L,NL) qui unifie NL avec la liste L auquel on a retiré tous les éléments de la liste E (s’ils existent)%%
+%% retirer_liste(E,L,NL) qui unifie NL avec la liste L auquel on a retir?tous les ??ents de la liste E (s?ils existent)%%
 
 retirer_liste([],L,L):-!.
 retirer_liste([T|QE],L,NL):-retirer_element_x(T,L,Res),retirer_liste(QE,Res,NL).
 
-%% set_element_n(N,L,X,NL) qui remplace le Ne élément de la liste L par l’élément unifié avec X et qui unifie le résultat avec NL
+%% set_element_n(N,L,X,NL) qui remplace le Ne ??ent de la liste L par l???ent unifi?avec X et qui unifie le r?ultat avec NL
 
 set_element_n(1,[_|Q],X,[X|Q]):-!.
 set_element_n(N,[T|Q],X,[T|Reste]):- P is N-1,set_element_n(P,Q,X,Reste).
@@ -68,7 +68,7 @@ imprime([T|Q]) :- imprimeLigne(T),nl,imprime(Q).
 imprimeLigne([]).
 imprimeLigne([T|Q]) :- nonvar(T),write(T),tab(1),imprimeLigne(Q);
 						write('_'),tab(1),imprimeLigne(Q).
-						
+
 imprimeIndice([]).
 imprimeIndice([T|Q]) :- imprimeLigneIndice(T),nl,imprimeIndice(Q).
 
@@ -83,7 +83,7 @@ aplatir(E,[E]).
 /*regionSudoku([],[]).
 regionSudoku([L1,L2,L3|Q],[R1,R2,R3|R]):- region(L1,L2,L3,R1,[RL1,RL2,RL3]),region(RL1,L2,L3,R1,Reste2),regionSudoku(Q,R).
 
-%%(L1,L2,L3,R,Reste) Renvoie la première region faisable de l1->l3 dans R, er retourne le reste
+%%(L1,L2,L3,R,Reste) Renvoie la premi?e region faisable de l1->l3 dans R, er retourne le reste
 region([],[],[],[],[]).
 region([X11,X12,X13|RL1],[X21,X22,X23|RL2],[X31,X32,X33|RL3],[X11,X12,X13,X21,X22,X23,X31,X32,X33],[RL1,RL2,RL3]).
 */
@@ -100,12 +100,12 @@ region(S,[R1,R2,R3,R4,R5,R6,R7,R8,R9]):-region_sudoku(S,[[R1,R2,R3],[R4,R5,R6],[
 get_region(X,Y,S,R):-region(S,Regions),NReg is (((X-1) //3 *3 + 1) + ((Y-1) // 3)),element(NReg,Regions,R).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-/* (M1,M2) Renvoie transposé de M1 dans M2 */
+/* (M1,M2) Renvoie transpos?de M1 dans M2 */
 trans([], []).
-trans([[H|T] |Tail], [[H|NT] |NTail]) :- 
+trans([[H|T] |Tail], [[H|NT] |NTail]) :-
 	firstCol(Tail, NT, Rest), trans(Rest, NRest), firstCol(NTail, T, NRest).
-	
-/* (L1,L2,L3) met première colonne dans L2 et Reste des lignes dans L3*/
+
+/* (L1,L2,L3) met premi?e colonne dans L2 et Reste des lignes dans L3*/
 firstCol([], [], []).
 firstCol([[H|T] |Tail], [H|Col], [T|Rows]) :- firstCol(Tail, Col, Rows).
 
@@ -115,10 +115,9 @@ domainCheck([H|T]) :- between(1,9,H), domainCheck(T),!.
 */
 %%%%%%%%%%%%%%
 /*Liste simple*/
- 
+
 domainCheck([]).
 domainCheck([T|Q]) :- member(A, [1, 2, 3, 4, 5, 6, 7, 8, 9]), domainCheck(Q),!.
-
 
 %%% A REFAIRE UNE FOIS PLUS AVANCE
 differentes([]).
@@ -133,7 +132,7 @@ get_possibles(X,Y,S,P):-element(X,S,Ligne),element(Y,Ligne,ValCel),
 						trans(S,Cols),element(Y,Cols,Col),retirer_element_x(ValCel,Col,ColSansVal),
 						get_region(X,Y,S,Region),retirer_element_x(ValCel,Region,RegionSansVal),
 						get_possibles_forLCR(LigneSansVal,ColSansVal,RegionSansVal,P),!.
-			
+
 get_possibles_forLCR(Ligne,Col,Region,Possible):-L=[1,2,3,4,5,6,7,8,9],retirer_liste(Ligne,L,SansLigne),retirer_liste(Col,SansLigne,SansCol),retirer_liste(Region,SansCol,Possible).
 
 get_valeur(X,Y,S,V):-element(X,S,Ligne),element(Y,Ligne,V).
@@ -198,7 +197,7 @@ ligneDifferente(Desordre) :- sort(Desordre,Trie),length(Trie, TailleTrie),length
 
 ligneDifferente(Desordre) :- tri(Desordre,Trie),longueur(Trie, TailleTrie),longueur(Desordre,TailleDesordre),TailleDesordre==TailleTrie.
 
-	
+
 l([
         [x,4,3,x,8,x,2,5,x],
         [6,x,x,x,x,x,x,x,x],
@@ -210,7 +209,7 @@ l([
         [x,x,x,x,x,x,x,x,5],
         [x,3,4,x,9,x,7,1,x]
   ]).
-  
+
 lfacile([
         [x,9,x,4,x,x,3,x,x],
         [x,x,x,x,7,x,x,x,x],
@@ -222,7 +221,7 @@ lfacile([
         [x,x,x,x,8,x,x,x,x],
         [x,x,4,x,x,7,x,8,x]
   ]).
-  
+
 exempleValide1([
 			[9,2,8,4,1,7,6,5,3],
 			[6,3,1,5,9,2,7,4,8],
@@ -235,7 +234,7 @@ exempleValide1([
 			[5,6,9,8,3,1,4,7,2]
 ]).
 
-l2([ 
+l2([
 [x,x,1,x,3,2,x,4,9],
 [x,3,x,6,x,x,x,5,x],
 [6,x,x,1,x,x,7,8,x],
@@ -244,7 +243,7 @@ l2([
 [7,x,5,x,x,x,x,3,2],
 [x,8,6,x,x,9,x,x,4],
 [x,2,x,x,x,7,x,1,x],
-[1,9,x,4,5,x,3,x,x] 
+[1,9,x,4,5,x,3,x,x]
 ]).
 
 test_poss([
@@ -258,7 +257,7 @@ test_poss([
 [x,x,x,x,x,x,x,x,5],
 [x,3,4,x,9,x,7,1,x]
 ]).
- 
+
 
 solved([[1,4,3,9,8,6,2,5,7],
 [6,7,9,4,2,5,3,8,1],
@@ -272,3 +271,96 @@ solved([[1,4,3,9,8,6,2,5,7],
 
 %grille(0,L).
 %grille(N,L):- N>0,concat(L,liste(X),L),grille(N-1,L).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% AJOUT LEO 14/06
+
+% verifier que les coordonnÃ©es sont valides en interne 0-8
+validCoord(X):- X>=0, X=<8, integer(X), !.
+validCoord(_):- fail.
+
+% verifier que les coordonnÃ©es entrÃ©es par l'utilisateur sont valides 1-9
+validUserInputNumber(X):- X>0, X=<9, integer(X), !.
+validUserInputNumber(_):- nl, write('Saisie incorrecte !'),nl,nl, fail.
+
+% verifier si la case est une case jouÃ©e
+isPlayableCell(X,Y,Sudoku):- getElement(X,Y,Sudoku,Element), Element = ' ',!.
+%% isPlayableCell(X,Y,_):- isJeuJoueur([X,Y]),!.
+isPlayableCell(_,_,_):- write('Cette case n\'est pas jouable!'),nl,fail.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ===PROGRAMME PRINCIPAL=== %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+sudoku :- nl,
+    write('====================================================='),nl,
+    write('======= Bienvenue dans notre programme sudoku ======='),nl,
+    write('====================================================='),nl,nl,
+    repeat, menu, !.
+menu :- write('\t\t=====  MENU  ====='),nl,nl,
+    write(' Que voulez vous faire ?'),nl,nl,
+    write('1. Resoudre un sudoku'),nl,
+    write('2. Proposer un sudoku'),nl,
+    write('4. Quitter'),nl,nl,
+    write('Que voulez-vous faire ? : '),
+    read(Choice), nl,
+    handle(Choice),
+    Choice=4, nl.
+
+handle(1):- write('---- RESOLUTION D\'UN SUDOKU ----'),nl,
+                        l(S),
+                        %% imprime(S),nl,
+                        %% solve(S,NS),
+                        %% imprime(NS),nl,
+                        asserta(sudokuGrid(S)),
+                        repeat,
+                        userSolvingSudoku,
+                        !.
+handle(2):- write('---- PROPOSER UN SUDOKU ----'), nl, !.
+handle(4):- write('---- Au revoir ! ----'),!.
+handle(_):- write('---- Option invalide ----'),!.
+
+userSolvingSudoku :- nl,write('---- ComplÃ©tez le sudoku ----'),nl,nl,
+    sudokuGrid(S), imprime(S), nl,
+    write('1. Definir numero'), nl,
+    write('2. Effacer numero'), nl,
+    write('4. Quitter'), nl, nl,
+    write('Que voulez-vous faire ? : '),
+    read(Choice), nl,
+    handleResolution(Choice,S),
+    sudokuGrid(ModifiedGrid),
+    isProgramFinished(ModifiedGrid,Choice). %% ???
+
+% Definir d'un numero
+handleResolution(1,S):- write('Ligne de la case Ã  modifier : '), read(X), validUserInputNumber(X),nl,
+    write('Colonne de la case Ã  modifier :'), read(Y), validUserInputNumber(Y),nl,
+    write('Valeur de la case : '), read(N), validUserInputNumber(N),nl,
+    X1 is (X-1), Y1 is (Y-1),
+    isPlayableCell(X1,Y1,S), %% ???
+    changer(N,X1,Y1,S,S1), %% ???
+    verification(X1,Y1,S1), %% ???
+    retract(sudokuGrid(S)),
+    asserta(sudokuGrid(S1)),
+    addPlayerMove([X1,Y1]), %% ???
+    write('SuccÃ¨s de l\'ajout.'),nl,!.
+
+handleResolution(1,_):- !.
+
+% Effacer un numero
+handleResolution(2,S):- write('Ligne de la case Ã  effacer :'), read(X), validUserInputNumber(X),nl,
+    write('Colonne de la case Ã  effacer:'), read(Y), validUserInputNumber(Y),nl,
+    X1 is (X-1), Y1 is (Y-1),
+    isPlayableCell(X1,Y1,S), %% ???
+    isCellCompleted(X1,Y1,S), %% ???
+    changer(' ',X1,Y1,S,S1), %% ???
+    retract(sudokuGrid(S)),
+    asserta(sudokuGrid(S1)),
+    deletePlayerMove([X,Y]),!. %% ???
+
+handleResolution(2,_):- !.
+
+handleResolution(4,_):-!.
+
+handleResolution(_,_):- nl, write('Option invalide'), nl, !, fail.
