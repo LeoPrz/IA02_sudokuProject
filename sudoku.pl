@@ -114,13 +114,13 @@ get_region(X,Y,S,R):-region(S,Regions),NReg is (((X-1) //3 *3 + 1) + ((Y-1) // 3
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 /* (M1,M2) Renvoie transposé de M1 dans M2 */
-trans([], []).
-trans([[H|T] |Tail], [[H|NT] |NTail]) :- 
-	firstCol(Tail, NT, Rest), trans(Rest, NRest), firstCol(NTail, T, NRest).
+transpose([], []).
+transpose([[H|Q] |Tail], [[H|NT] |NTail]) :- 
+	firstCol(Tail, NT, Rest), transpose(Rest, NRest), firstCol(NTail, Q, NRest).
 	
 /* (L1,L2,L3) met première colonne dans L2 et Reste des lignes dans L3*/
 firstCol([], [], []).
-firstCol([[H|T] |Tail], [H|Col], [T|Rows]) :- firstCol(Tail, Col, Rows).
+firstCol([[H|Q] |Tail], [H|Col], [Q|Rows]) :- firstCol(Tail, Col, Rows).
 
 %%%% ------------------------------------------------------------ %%%%
 
@@ -135,10 +135,10 @@ differentes([]).
 differentes([T|Q]) :- ligneDifferente(T),differentes(Q).
 
 
-get_possibles(X,Y,S,P):-element(X,S,Ligne),element(Y,Ligne,ValCel),ValCel==x,trans(S,Cols),element(Y,Cols,Col),get_region(X,Y,S,Region),get_possibles_forLCR(Ligne,Col,Region,P),!.
+get_possibles(X,Y,S,P):-element(X,S,Ligne),element(Y,Ligne,ValCel),ValCel==x,transpose(S,Cols),element(Y,Cols,Col),get_region(X,Y,S,Region),get_possibles_forLCR(Ligne,Col,Region,P),!.
 get_possibles(X,Y,S,P):-element(X,S,Ligne),element(Y,Ligne,ValCel),
 						ValCel\=x,retirer_element_x(ValCel,Ligne,LigneSansVal),
-						trans(S,Cols),element(Y,Cols,Col),retirer_element_x(ValCel,Col,ColSansVal),
+						transpose(S,Cols),element(Y,Cols,Col),retirer_element_x(ValCel,Col,ColSansVal),
 						get_region(X,Y,S,Region),retirer_element_x(ValCel,Region,RegionSansVal),
 						get_possibles_forLCR(LigneSansVal,ColSansVal,RegionSansVal,P),!.
 			
