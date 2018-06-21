@@ -14,18 +14,23 @@ sudoVide([
 %%%%%%%%%%% ** Predicats de manipulation de listes ** %%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% unifie longueur de la liste L dans N %%
 longueur([],0).
 longueur([T|Q],N):-longueur(Q,P),N is P+1.
 
+%% unifie L avec concaténation de L1 et L2%%
 concat([],L,L).
 concat([T|Q],L,[T|R]) :- concat(Q,L,R).
 
+
+%% unifie L1 avec les valeur de L inférieure ou égale a X, et supérieure ou égale avec L2%%
 partition(_,[],[],[]).
 partition(X,[T|Q],[T|Linf],Lsup) :- nonvar(T),T<X, partition(X,Q,Linf,Lsup),!.
 partition(X,[T|Q],Linf,[T|Lsup]) :- nonvar(T),T>X, partition(X,Q,Linf,Lsup),!.
 partition(X,[T|Q],Linf,Lsup) :- nonvar(T),T==X, partition(X,Q,Linf,Lsup),!.
 partition(X,[T|Q],[T|Linf],Lsup) :- partition(X,Q,Linf,Lsup).
 
+%% unifie L2 avec L1 trié %%
 tri([],[]).
 tri([T|Q],Res) :- nonvar(T),partition(T,Q,Linf,Lsup),tri(Linf,LinfTrie),tri(Lsup,LsupTrie),concat(LinfTrie,[T|LsupTrie],Res),!.
 tri([T|Q],Res) :- partition(0,Q,Linf,Lsup),tri(Linf,LinfTrie),tri(Lsup,LsupTrie),concat(LinfTrie,[T|LsupTrie],Res),!.
@@ -54,6 +59,7 @@ retirer_liste([T|QE],L,NL):-retirer_element_x(T,L,Res),retirer_liste(QE,Res,NL).
 set_element_n(1,[_|Q],X,[X|Q]):-!.
 set_element_n(N,[T|Q],X,[T|Reste]):- P is N-1,set_element_n(P,Q,X,Reste).
 
+%% flatten L1 dans L2 %%
 aplatir([],[]).
 aplatir([T|Q],R):-aplatir(T,R1),aplatir(Q,R2),concat(R1,R2,R),!.
 aplatir(E,[E]).
@@ -64,26 +70,35 @@ aplatir(E,[E]).
 %%%%%%%%%%%%%%%%%%%%%% ** Affichage ** %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% imprime le sudoku %%
+
 imprime(S) :- nl,imprime3Lignes(S),!,write('-------------------------').
 
+%% imprime 3 premieres lignes du sudoku %%
 imprime3Lignes([]).
 imprime3Lignes([L1,L2,L3|Q]):- write('-------------------------'),nl,imprimeLigne(L1),nl,imprimeLigne(L2),nl,imprimeLigne(L3),nl,imprime3Lignes(Q).
 
+%% imprime une liste %%
 imprimeLigne([]):- write('|').
 imprimeLigne([V1,V2,V3|Q]) :- write('|'),tab(1),imprimeValeur(V1),tab(1),imprimeValeur(V2),tab(1),imprimeValeur(V3),tab(1),imprimeLigne(Q).
-            
+ 
+%% imprime une valeur %% 
 imprimeValeur(V):- V\=x, write(V);write('_').
 
 %% AFFICHAGE JEU %%
 
+%% imprime le sudoku en fonction du calque %%
 imprimeCalque(S,B):- nl,imprime3LignesCalque(S,B),!,write('-----------------------------------').
 
+%% imprime une liste en fonction du calque %%
 imprime3LignesCalque([],_).
 imprime3LignesCalque([L1,L2,L3|Q],[L1B,L2B,L3B|QB]):- write('-----------------------------------'),nl,imprimeLigneCalque(L1,L1B),nl,imprimeLigneCalque(L2,L2B),nl,imprimeLigneCalque(L3,L3B),nl,imprime3LignesCalque(Q,QB).
 
+%% imprime 3 premieres lignes du sudoku en fonction du calque %%
 imprimeLigneCalque([],_):- write('|').
 imprimeLigneCalque([V1,V2,V3|Q],[V1B,V2B,V3B|QB]) :- write('|'),tab(1),imprimeValeurCalque(V1,V1B),imprimeValeurCalque(V2,V2B),imprimeValeurCalque(V3,V3B),imprimeLigneCalque(Q,QB).
-  
+ 
+%% imprime valeur en fonction du calque %%
 imprimeValeurCalque(V,VB):- V\=x, VB\=y,tab(1), write(V),tab(1),!.
 imprimeValeurCalque(V,VB):- V\=x, VB==y,write(V),write('~'),tab(1),!.
 imprimeValeurCalque(V,VB):- tab(1),write('_'),tab(1).
@@ -102,14 +117,18 @@ imprimeLigneIndice([T|Q]) :-write(T),tab(1),imprimeLigneIndice(Q).
 %%%%%%%%%%%%%%% ** Récuperation Colonnes/ Regions ** %%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Récupère 3 régions %%
 region3Lignes([],[],[],[]).
 region3Lignes([X1,X2,X3|RL1], [X4,X5,X6|RL2], [X7,X8,X9|RL3], [[X1,X2,X3,X4,X5,X6,X7,X8,X9]|RR]):-region3Lignes(RL1,RL2,RL3,RR).
 
+%% Récupère régions du sudoku mais mauvaise forme de liste%%
 region_sudoku([],[]).
 region_sudoku([L1,L2,L3|RL],[TR|RR]):-region3Lignes(L1,L2,L3,TR),region_sudoku(RL,RR).
 
+%% Récupère régions du sudoku de manière à être utilisé par nos prédicats %%
 region(S,[R1,R2,R3,R4,R5,R6,R7,R8,R9]):-region_sudoku(S,[[R1,R2,R3],[R4,R5,R6],[R7,R8,R9]]).
 
+%% renvoie la région d'une case de coords X,Y %%
 get_region(X,Y,S,R):-region(S,Regions),NReg is (((X-1) //3 *3 + 1) + ((Y-1) // 3)),element(NReg,Regions,R).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -128,38 +147,48 @@ firstCol([[H|Q] |Tail], [H|Col], [Q|Rows]) :- firstCol(Tail, Col, Rows).
 %%%%%%%%%%%%%%%%%%%%%%%% ** Resolution ** %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% sefface si le domaine de la liste en paramètre est bon %%
 domainCheck([]).
 domainCheck([T|Q]) :- member(A, [1, 2, 3, 4, 5, 6, 7, 8, 9]), domainCheck(Q),!.
 
+%% sefface si la liste contient que des valeurs différentes %%
 differentes([]).
 differentes([T|Q]) :- ligneDifferente(T),differentes(Q).
 
-
+%% unifie avec P la liste des possibilités pour une case (X,Y) dans S %%
 get_possibles(X,Y,S,P):-element(X,S,Ligne),element(Y,Ligne,ValCel),ValCel==x,transpose(S,Cols),element(Y,Cols,Col),get_region(X,Y,S,Region),get_possibles_forLCR(Ligne,Col,Region,P),!.
 get_possibles(X,Y,S,P):-element(X,S,Ligne),element(Y,Ligne,ValCel),
 						ValCel\=x,retirer_element_x(ValCel,Ligne,LigneSansVal),
 						transpose(S,Cols),element(Y,Cols,Col),retirer_element_x(ValCel,Col,ColSansVal),
 						get_region(X,Y,S,Region),retirer_element_x(ValCel,Region,RegionSansVal),
 						get_possibles_forLCR(LigneSansVal,ColSansVal,RegionSansVal,P),!.
-			
+
+%% unifie avec Possible la liste des possibilités en fonction d'une ligne,colonne et région %%						
 get_possibles_forLCR(Ligne,Col,Region,Possible):-L=[1,2,3,4,5,6,7,8,9],retirer_liste(Ligne,L,SansLigne),retirer_liste(Col,SansLigne,SansCol),retirer_liste(Region,SansCol,Possible).
 
+%% unifie la valeur d'une case (X,Y) de S avec V%%	
 get_valeur(X,Y,S,V):-element(X,S,Ligne),element(Y,Ligne,V).
 
+%% change valeur d'une case (X,Y) de S avec V et unifie avec NS, nouveau sudoku%%	
 set_valeur(1,Y,[T|Q],V,[NT|Q]):-set_element_n(Y,T,V,NT),!.
 set_valeur(X,Y,[T|Q],V,[T|NQ]):-P is X-1,set_valeur(P,Y,Q,V,NQ).
 
+%% sefface si une case (X,Y) donné de S est valide %%	
 case_valide(X,Y,S):-get_possibles(X,Y,S,P),P\=[],get_valeur(X,Y,S,V),V==x,!.
 case_valide(X,Y,S):-get_possibles(X,Y,S,P),P\=[],get_valeur(X,Y,S,V),element(N,P,V),!.
 
-
+%% sefface si une case (X,Y) donné de S nest pas valide %%	
 case_non_valide(X,Y,S):- \+case_valide(X,Y,S).
 
+
+%% sefface si un Sudoku S est valide %%	
 valide(S):-get_valeur(X,Y,S,V),case_non_valide(X,Y,S),!,fail.
 valide(S).
 
+%% génère des coordonnés (X,Y) des case vide dun sudoku S %%	
 get_coord_x(X,Y,S):-get_valeur(X,Y,S,x).
 
+%% génère des coordonnés (X,Y) des case contenant 'y' dun sudoku S %%
 get_coord_y(X,Y,S):-get_valeur(X,Y,S,y).
 
 
@@ -167,11 +196,14 @@ get_coord_y(X,Y,S):-get_valeur(X,Y,S,y).
 %%%%%%%%%%%%%%%%%%%%%% ** Generate-and-test ** %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% sefface si le sudoku S est resolu %%
 solved(S):-get_coord_x(X,Y,S),!,fail.
 solved(S):-valide(S).
 
+%% génère des sudokus possible après une seule insertion possible %%
 genere_sudoku(S,NS):- get_coord_x(X,Y,S),!,get_possibles(X,Y,S,P),element(N,P,V),set_valeur(X,Y,S,V,NS).
 
+%% unifie la solution de S avec Solution  %%
 solve(S,S):- solved(S).
 solve(S,Solution):-genere_sudoku(S,NS),valide(NS),solve(NS,Solution).
 
@@ -180,21 +212,28 @@ solve(S,Solution):-genere_sudoku(S,NS),valide(NS),solve(NS,Solution).
 %%%%%%%%%%%%%%%%%%% ** Generer random Sudoku ** %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% sefface si S est complètement généré  %%
 generated(S):- get_coord_y(X,Y,S),!,fail.
 generated(S):- valide(S).
 
+%% genere une valeur aléatoire possible pour une case (X,Y) %%
 genere_random_value(X,Y,S,V):- get_possibles(X,Y,S,P),longueur(P,Long),BornSup is Long+1,random(1,BornSup,N),element(N,P,V).
 
+%% unifie un sudoku aléatoire avec Solution issu de S  %%
 genere_random_sudoku(S,S):- generated(S),!.
 genere_random_sudoku(S,Solution):- get_coord_y(X,Y,S),!,genere_random_value(X,Y,S,V),set_valeur(X,Y,S,V,NS),genere_random_sudoku(NS,Solution).
 
+%% unifie un sudoku aléatoire NS issu S, répète tant que le sudoku nest pas résolvable  %%
 gen_r_repeat(S,NS):- repeat,genere_random_sudoku(S,NS),solve(NS,Solved),!.
 
+%% unifie des coordonnées aléatoire avec X et Y %%
 genere_random_coord(X,Y):- P is 10,random(1,P,X),random(1,P,Y).
 
+%% génère un calque aléatoire %%
 genere_random_grid_y(0,S,S):- genere_random_coord(X,Y),set_valeur(X,Y,S,y,NS),!.
 genere_random_grid_y(N,S,RS):- genere_random_coord(X,Y),set_valeur(X,Y,S,y,NS),P is N-1,genere_random_grid_y(P,NS,RS).
 
+%% sefface si la ligne est complètement differente %%
 ligneDifferente(Desordre) :- tri(Desordre,Trie),longueur(Trie, TailleTrie),longueur(Desordre,TailleDesordre),TailleDesordre==TailleTrie.
 
 %%%% ------------------------------------------------------------ %%%%
@@ -203,13 +242,14 @@ ligneDifferente(Desordre) :- tri(Desordre,Trie),longueur(Trie, TailleTrie),longu
 %%%%%%%%%%%%%%%%%%%%%% ** USER INTERFACE ** %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+%% Lance l interface %%
 start :- nl,nl,
 		write('***************************************************'),nl,
 		write('*** Vous avez lancé le programme ProjectSudoku ***'),nl,
 		write('***************************************************'),
 		queFaire,!.
-
+		
+%% demande ce qu il faut faire %%
 queFaire :- nl,write('Que voulez vous faire ?'),nl,
 			tab(2),write('1. Resoudre un sudoku'),nl,
 			tab(2),write('2. Generer un sudoku'),nl,
@@ -218,16 +258,17 @@ queFaire :- nl,write('Que voulez vous faire ?'),nl,
 			write(' ---->'),tab(1),read(Option),
 			interpreterMenu(Option).
 
+%% interprète l'option de l'utilisareur %%
 interpreterMenu(1):- sudoVide(S),retractall(sudoAResoudre(_)),asserta(sudoAResoudre(S)),repeat,resoudre_sudo_user,!.
 interpreterMenu(2):- sudoVide(S),retractall(randomSudo(_)),asserta(randomSudo(S)),repeat,generer_sudo_user,!.
-interpreterMenu(3):- sudoVide(S),genere_random_grid_y(7,S,NS),gen_r_repeat(NS,R),
+interpreterMenu(3):- sudoVide(S),genere_random_grid_y(17,S,NS),gen_r_repeat(NS,R),
 					 retractall(jouerSudo(_)),asserta(jouerSudo(R)),
 					 retractall(baseJouerSudo(_)),asserta(baseJouerSudo(NS)),
 					 repeat,jouer_sudo_user,!.
 interpreterMenu(4).
 
 %%%%%%%%%%%%%%%%%%%%%%%%% ** Resolution ** %%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%% demande ce qu il faut faire pour la resolution %%
 resoudre_sudo_user:- 
 			nl,write('Voici la grille actuelle :'),nl,
 			sudoAResoudre(S),imprime(S),nl,
@@ -239,6 +280,7 @@ resoudre_sudo_user:-
 			write(' ---->'),tab(1),read(Option),
 			interpreterResolution(Option).
 
+%% interprète l'option de l'utilisareur pour la resolution %%
 interpreterResolution(1):- read_coord_user(X,Y),
 						   read_valeur(V),
 						   sudoAResoudre(S),
@@ -271,6 +313,7 @@ interpreterResolution(_):- messageErrorOption,fail.
 
 %%%%%%%%%%%%%%%%%%%%%%%%% ** Generer ** %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% demande ce qu il faut faire pour la generation%%
 generer_sudo_user:- 
 			nl,write('Voici la grille actuelle :'),nl,
 			randomSudo(S),imprime(S),nl,
@@ -281,7 +324,8 @@ generer_sudo_user:-
 			tab(2),write('4. Fin de programme'),nl,
 			write(' ---->'),tab(1),read(Option),
 			interpreterGeneration(Option).
-			
+
+%% interprète l'option de l'utilisareur pour la generation %%			
 interpreterGeneration(1):- read_nb_cases(NB),
 						   randomSudo(S),
 						   genere_random_grid_y(NB,S,NS),
@@ -305,6 +349,7 @@ interpreterGeneration(_):- messageErrorOption,fail.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% ** Jouer ** %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% demande ce qu il faut faire pour le jeu %
 jouer_sudo_user:- 
 			nl,write('Voici la grille actuelle :'),nl,
 			jouerSudo(S),baseJouerSudo(B),imprimeCalque(S,B),nl,
@@ -318,7 +363,7 @@ jouer_sudo_user:-
 			interpreterJeu(Option).
 
 
-			
+%% interprète l'option de l'utilisareur pour le jeu %%				
 interpreterJeu(1):- read_coord_user(X,Y),
 					baseJouerSudo(B), check_not_base(X,Y,B),
 					jouerSudo(S),read_valeur(V),
@@ -354,35 +399,45 @@ interpreterJeu(_):- messageErrorOption,fail.
 
 %%%%%%%%%%%%%%%%%%%%% ** Predicats dans gestion UI ** %%%%%%%%%%%%%%%%%%%%%%%
 
+%% predicat intermediaire pour recuperation d'un sudo par calque %%	
 recup_sudo_calque(_,B,Res,Res):- valide(B),!.
 recup_sudo_calque(S,B,ORes,Res):- get_coord_y(X,Y,B),!,get_valeur(X,Y,S,V),set_valeur(X,Y,ORes,V,Tmp),set_valeur(X,Y,B,x,NB),recup_sudo_calque(S,NB,Tmp,Res).
 
+%% unifie avec SB le sudoku issu de S par le calque B %%	
 recup_sudo_calque(S,B,SB):-vide(X),recup_sudo_calque(S,B,X,SB).
 
+%% unifie avec le deuxième argument un calque issu du premier argument %%	
 getCalque([],[]).
 getCalque([T|Q],[TC|QC]):- getCalqueLigne(T,TC),getCalque(Q,QC).
 
+%% unifie avec le deuxième argument un calque issu du premier argument (pour ligne) %%	
 getCalqueLigne([],[]).
 getCalqueLigne([x|QL],[x|QCL]):-getCalqueLigne(QL,QCL),!.
-getCalqueLigne([TL|QL],[y|QCL]):-getCalqueLigne(QL,QCL).
+getCalqueLigne([TL|QL],[y|QCL]):- getCalqueLigne(QL,QCL).
 
+%% s'efface si la coordonné n'est pas un 'y' %%
 check_not_base(X,Y,B) :- \+get_coord_y(X,Y,B).
 
 %%%%%%%%%%%%%%%%%%%%%%%%% ** Lecture user ** %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% message erreur %%
 messageErrorOption:-  write('** Erreur dans le choix d\'option **').
 
+%% lecture de coordonnées %%
 read_coord_user(X,Y):- nl,write('Ligne de la case : '),nl,write(' ---->'), read(X),read_valide(X),nl,
 					   write('Colonne de la case : '),nl,write(' ---->'), read(Y),read_valide(Y),nl,!.
 
 read_coord_user(_,_):- nl,write('***** COORDONNEES INVALIDES *****'),nl,fail.
 
+%% lecture de valeur de case %%
 read_valeur(V):- write('valeur de la case : '),nl,write(' ---->'), read(V),read_valide(V),nl,!.
 
 read_valeur(V):- nl,write('***** VALEUR INVALIDE *****'),nl,fail.
 
+%% sefface si X est valide %%
 read_valide(X):- X>0,X<10.
 
+%% lecture du nombre de cases %%
 read_nb_cases(NB) :- write('nombre de cases au plus à changer : '),nl,write(' ---->'), read(NB),nl,!.
 
 
@@ -446,7 +501,19 @@ test_poss([
 [x,x,x,x,x,x,x,x,5],
 [x,3,4,x,9,x,7,1,x]
 ]).
- 
+
+ldifficile([
+[x,x,x,7,5,x,6,2,x],
+[x,x,1,x,x,x,x,x,x],
+[6,x,2,x,x,4,x,1,x],
+[x,x,x,x,x,3,x,4,6],
+[x,6,x,x,1,x,x,7,x],
+[4,3,x,6,x,x,x,x,x],
+[x,1,x,9,x,x,5,x,7],
+[x,x,x,x,x,x,8,x,x],
+[x,9,8,x,2,6,x,x,x]
+]).
+
 vide([
 [x,x,x,x,x,x,x,x,x],
 [x,x,x,x,x,x,x,x,x],
@@ -492,4 +559,3 @@ solvedEx([[1,4,3,9,8,6,2,5,7],
 [8,2,1,5,6,7,4,3,9],
 [7,9,6,1,4,3,8,2,5],
 [5,3,4,8,9,2,7,1,x]]).
-
